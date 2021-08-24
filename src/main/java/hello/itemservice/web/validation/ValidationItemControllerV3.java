@@ -20,49 +20,42 @@ import java.util.List;
 public class ValidationItemControllerV3 {
 
     private final ItemRepository itemRepository;
-
     @GetMapping
     public String items(Model model) {
         List<Item> items = itemRepository.findAll();
         model.addAttribute("items", items);
         return "validation/v3/items";
     }
-
     @GetMapping("/{itemId}")
     public String item(@PathVariable long itemId, Model model) {
         Item item = itemRepository.findById(itemId);
         model.addAttribute("item", item);
         return "validation/v3/item";
     }
-
     @GetMapping("/add")
     public String addForm(Model model) {
         model.addAttribute("item", new Item());
         return "validation/v3/addForm";
     }
-
     @PostMapping("/add")
-    public String addItemV6(@Validated @ModelAttribute Item item, BindingResult bindingResult, RedirectAttributes redirectAttributes, Model model) {
-
-        // 검증 실패 시 다시 입력 폼으로 이동
+    public String addItem(@Validated @ModelAttribute Item item, BindingResult
+            bindingResult, RedirectAttributes redirectAttributes) {
         if (bindingResult.hasErrors()) {
-            log.info("errors = {}", bindingResult);
+            log.info("errors={}", bindingResult);
             return "validation/v3/addForm";
         }
-
+        //성공 로직
         Item savedItem = itemRepository.save(item);
         redirectAttributes.addAttribute("itemId", savedItem.getId());
         redirectAttributes.addAttribute("status", true);
         return "redirect:/validation/v3/items/{itemId}";
     }
-
     @GetMapping("/{itemId}/edit")
     public String editForm(@PathVariable Long itemId, Model model) {
         Item item = itemRepository.findById(itemId);
         model.addAttribute("item", item);
         return "validation/v3/editForm";
     }
-
     @PostMapping("/{itemId}/edit")
     public String edit(@PathVariable Long itemId, @ModelAttribute Item item) {
         itemRepository.update(itemId, item);
